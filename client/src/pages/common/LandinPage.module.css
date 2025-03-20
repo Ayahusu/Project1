@@ -1,0 +1,8 @@
+/* HomePage.module.css */
+.background_img {
+    background-image: url("../../src/assets/banner.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 600px;
+    width: 100%;
+}
