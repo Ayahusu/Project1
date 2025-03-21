@@ -1,96 +1,41 @@
-const { validationResult } = require("express-validator");
-const userSchema = require("../models/userModel");
+const User = require("../models/userModel");
 
-async function registerUser(req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+const handleGetUserProfile = async (req, res) => {
+
+    const userId = req.user._id;
 
     try {
-        console.log(req.body);
-        const { username, email, password } = req.body;
-
-        // Check if user already exists
-        const userExists = await userSchema.findOne({ email });
-        if (userExists) {
-            return res.status(401).json({ message: "User already exists" });
-        }
-
-        // Create user
-        const user = await userSchema.create({
-            username,
-            email,
-            password
-        });
-
-        // Generate authentication token
-        const token = await user.genAuthToken();
-
-        res.status(200).json({ user, token });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
-}
-
-
-const loginUser = async (req, res) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-        return res.status(400).json({ errors: errors.array() });
-
-    try {
-        const { email, password } = req.body;
-
-        const user = await userSchema.findOne({ email }).select("+password")
+        const user = await User.findOne({ _id: userId }).select("-password").populate("posts")
         if (!user) {
-            return res.status(401).json({ message: "Email or Password is Invalid" })
-        }
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Email or Password is Invalid" })
+            return res.status(404).json({ message: "User not Found" })
         }
 
-        const token = await user.genAuthToken();
-        res.status(200).json({ token, user })
+        return res.status(200).json(user)
     } catch (error) {
-        return res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
+        res.status(500).json({ message: "Server Not Found" });
     }
 }
 
-const handleUpdate = async (req, res) => {
+const handleGetUserProfileById = async (req, res) => {
 
-    const { username, newUsername, email } = req.body;
-
+    const profileId = req.params.id;
     try {
-        const response = await userSchema.findOneAndUpdate(
-            { username },   // Filter: Find user by username
-            { username: newUsername, email },  // Update fields
-            { new: true }
-        );
-
-        if (!response) {
-            return res.status(404).json({ message: "User not found" });
+        const user = await User.findOne({ _id: profileId }).select("-password").populate("posts")
+        if (!user) {
+            return res.status(404).json({ message: "User not Found" })
         }
 
-        res.status(200).json({ message: "Updated Successfully", user: response });
+        return res.status(200).json(user)
     } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
+        res.status(500).json({ message: "Server Not Found" });
     }
-};
-
+}
 
 const handleDeleteAccount = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const response = await userSchema.findOneAndDelete({ email });
+        const response = await User.findOneAndDelete({ email });
 
         if (!response) {
             return res.status(404).json({ message: "User not found" }); // ✅ If no user found, return 404
@@ -103,8 +48,7 @@ const handleDeleteAccount = async (req, res) => {
 };
 
 module.exports = {
-    registerUser,
-    loginUser,
+    handleGetUserProfile,
+    handleGetUserProfileById,
     handleDeleteAccount,
-    handleUpdate
 };

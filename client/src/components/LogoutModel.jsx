@@ -7,12 +7,13 @@ export default function LogoutModal({ showModal, setShowModal, handleLogout }) {
   const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
+    // Cleanup token when the user context changes
     if (user && user.token === localStorage.getItem("authToken")) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/login"); // Use navigate to redirect without page reload
     }
-  }, [user]); // Cleanup the token when the user context changes
+  }, [user, navigate]); // Cleanup when the user changes
 
   if (!showModal) return null; // Don't render if not visible
 
@@ -39,6 +40,7 @@ export default function LogoutModal({ showModal, setShowModal, handleLogout }) {
               localStorage.removeItem("authToken"); // Remove auth token from localStorage
               handleLogout(); // Perform any additional logout logic
               setShowModal(false); // Close modal after logout
+              navigate("/login"); // Redirect to login without page reload
             }}
           >
             Logout

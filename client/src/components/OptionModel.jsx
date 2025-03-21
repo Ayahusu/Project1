@@ -2,25 +2,21 @@ import axios from "axios";
 import React from "react";
 
 export default function OptionModel({ postId, setPosts }) {
-  const user = JSON.parse(window.localStorage.getItem("user"));
-
-  console.log(user._id);
+  const token = window.localStorage.getItem("authToken");
 
   const deletePost = async () => {
-    if (!user) {
-      console.error("User not logged in");
-      return;
-    }
-
     try {
       const response = await axios.delete(
-        `${
-          import.meta.env.VITE_BACKEND
-        }/api/posts/deletepost/${postId}?userId=${user._id}`
+        `${import.meta.env.VITE_BACKEND}/api/posts/deletePost/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (response.status === 204) {
-        // Remove the deleted post from the state immediately
         setPosts((prevPosts) =>
           prevPosts.filter((post) => post._id !== postId)
         );

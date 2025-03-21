@@ -1,6 +1,5 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/UserContext";
 import axios from "axios";
 
 export default function LoginPage() {
@@ -8,7 +7,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { setUser } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -17,7 +15,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND}/api/user/signin`,
+        `${import.meta.env.VITE_BACKEND}/api/auth/signin`,
         {
           username,
           email,
@@ -27,8 +25,6 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         window.localStorage.setItem("authToken", response.data.token);
-        window.localStorage.setItem("user", JSON.stringify(response.data.user)); // Fix here
-        setUser(response.data.user);
         navigate("/dashboard/post");
       } else {
         alert("Login Unsuccessful");

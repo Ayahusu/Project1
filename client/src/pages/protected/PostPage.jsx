@@ -5,13 +5,22 @@ import axios from "axios";
 
 export default function PostPage() {
   const [posts, setPosts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    const token = window.localStorage.getItem("authToken"); // Fetch inside useEffect
+    if (!token) return;
+
     const fetchPosts = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND}/api/posts/all`
+          `${import.meta.env.VITE_BACKEND}/api/posts/allPosts?page=1&limit=10`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
         setPosts(response.data);
       } catch (error) {
@@ -22,6 +31,7 @@ export default function PostPage() {
     fetchPosts();
   }, []);
 
+  // console.log(posts);
   // Filter posts based on the search query (title or description)
   const filteredPosts = posts.filter(
     (post) =>
@@ -42,7 +52,7 @@ export default function PostPage() {
             <Post
               key={post._id}
               postId={post._id}
-              username={post.user?.username || "Unknown"}
+              username={post.author?.username || "Unknown"}
               title={post.title}
               description={post.description}
               likes={post.likes.length}

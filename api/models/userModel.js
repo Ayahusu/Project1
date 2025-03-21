@@ -22,11 +22,11 @@ const userSchema = mongoose.Schema({
         minlength: [6, 'Password must be at least 6 characters long'],
         select: false
     },
-    post: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Post',
+    posts: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
         default: []
     },
+
     followers: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'User',

@@ -1,73 +1,100 @@
 const Post = require("../models/postModel")
+const User = require("../models/userModel")
 
 const createPost = async (req, res) => {
-    console.log(req.body)
+    // console.log(req.user)
     try {
         const { title, description } = req.body;
-        const userId = req.user?._id || req.body.user;
+        const author = req.user._id;
 
-        const post = await Post.create({
+        // Create a new post
+        const newPost = await Post.create({
             title,
             description,
-            user: userId,
+            author
         });
 
-        res.status(201).json({ message: "Post created successfully", post });
+        // Add the new post's _id to the 'posts' array of the user
+        await User.findByIdAndUpdate(
+            author,
+            { $push: { posts: newPost._id } },  // Push the post's ID to the user's posts array
+            { new: true }
+        );
 
+        // Respond with the newly created post
+        res.status(201).json(newPost);
     } catch (error) {
         console.error("Error in createPost:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
 
+
 const handleDeletePost = async (req, res) => {
     try {
         const postId = req.params.id;
-        const userId = req.query.userId;
+        const userId = req.user._id;
+
+        // console.log("Post Id:", postId)
+        // console.log("Post Id:", userId)
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
         }
-
-        console.log(`Post ID: ${postId}, User ID: ${userId}`);
 
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
 
-        // Compare user._id as strings or ObjectId depending on your model
-        if (post.user._id.toString() !== userId) {
+        // console.log("Post : ", post)
+        if (post.author.toString() !== userId.toString()) {
             return res.status(403).json({ message: "Unauthorized to delete this post" });
         }
 
         await Post.findByIdAndDelete(postId);
-        res.status(204).send(); // No content response after deletion
+        res.status(204).send();
     } catch (error) {
         console.error("Error deleting post:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
 
-
-
 const getAllPost = async (req, res) => {
     try {
-        const postList = await Post.find()
-            .populate('user', 'username')
-            .populate('comments.user', 'username profileImg');
-        console.log(postList)
+        const { page = 1, limit = 10 } = req.query;
 
-        if (!postList || postList.length === 0) {
-            return res.status(404).json({ message: "No Posts Found" });
+        const postList = await Post.find()
+            .populate('author', 'username')
+            .populate('comments.user', 'username profileImg')
+            .limit(limit * 1) // Convert string to number
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 }); // Sort by latest posts
+
+        if (!postList.length) {
+            return res.status(200).json([]); // Return empty array instead of 404
         }
 
         res.status(200).json(postList);
     } catch (error) {
-        console.error("Error in getAllPost:", error);  // ✅ Logs exact issue
-        res.status(500).json({ message: "Internal Server Error", error: error.message });
+        console.error("Error in getAllPost:", error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
 
 
-module.exports = { createPost, handleDeletePost, getAllPost };
+const getPostById = async (req, res) => {
+
+    const id = req.params.userId
+
+    const posts = await Post.find({ id });
+
+    if (!posts) {
+        return res.status(404).json({ message: "No post Found" })
+    }
+
+    res.status(200).json({ posts })
+}
+
+
+module.exports = { createPost, handleDeletePost, getAllPost, getPostById };

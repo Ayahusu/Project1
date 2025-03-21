@@ -21,8 +21,20 @@ export default function Post({
   const [toggleComment, setToggleComment] = useState(false);
   const [toggleOptions, setToggleOptions] = useState(false);
 
-  const handleLike = () => {
+  const token = window.localStorage.getItem("authToken");
+
+  const handleLike = async () => {
     setLiked(!liked);
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND}/api/post/like/${postId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   };
 
   // Function to close modal when clicking on overlay
@@ -36,8 +48,10 @@ export default function Post({
     setToggleOptions(!toggleOptions); // Correct way to toggle the state
   };
   const capitalizeFirstLetter = (str) => {
-    return str.replace(/^./, (char) => char.toUpperCase());
+    if (!str) return str; // Check if the string is empty or falsy
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
+
   return (
     <>
       {/* Normal Post */}

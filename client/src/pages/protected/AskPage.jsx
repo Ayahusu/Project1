@@ -11,11 +11,16 @@ export default function AskPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
-    setError("");
+    setSuccess(""); // Clear previous success message
+    setError(""); // Clear previous error message
+
+    // Check if title and description are provided
+    if (!title || !description) {
+      setError("Title and description are required!");
+      return;
+    }
 
     const token = window.localStorage.getItem("authToken");
-    console.log(token);
 
     if (!token) {
       setError("Unauthorized: No token provided");
@@ -24,8 +29,8 @@ export default function AskPage() {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND}/api/posts/create`,
-        { title, description, user: user._id },
+        `${import.meta.env.VITE_BACKEND}/api/posts/createPost`,
+        { title, description },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -36,14 +41,19 @@ export default function AskPage() {
 
       if (response.status === 201) {
         setSuccess("Post created successfully!");
-        setTitle(""); // Clear input fields
+        setTitle(""); // Clear input fields after success
         setDescription("");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "An error occurred while creating the post."
-      );
+      // Enhanced error handling
+      if (error.response && error.response.data) {
+        setError(
+          error.response.data.message ||
+            "An error occurred while creating the post."
+        );
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
     }
   };
 

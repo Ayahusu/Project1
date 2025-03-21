@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const dbConnect = require("./config/dbConfig")
+const authRoute = require("./routes/authRoutes")
 const userRoute = require("./routes/userRoutes")
 const postRoute = require("./routes/postRoutes")
 dotenv.config()
@@ -24,6 +25,7 @@ app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
+app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute)
 app.use("/api/posts", postRoute)
 
