@@ -1,5 +1,7 @@
 const User = require("../models/userModel");
 
+//@ Protect Route
+//@ Handle Get User Profile
 const handleGetUserProfile = async (req, res) => {
 
     const userId = req.user._id;
@@ -16,6 +18,8 @@ const handleGetUserProfile = async (req, res) => {
     }
 }
 
+//@ Protect Route
+//@ Handle Get User Profile By Id
 const handleGetUserProfileById = async (req, res) => {
 
     const profileId = req.params.id;
@@ -31,19 +35,20 @@ const handleGetUserProfileById = async (req, res) => {
     }
 }
 
+//@ Protect Route
+//@ Handle Delete Account
 const handleDeleteAccount = async (req, res) => {
-    const { email } = req.body;
+    const email = req.body.user;
 
     try {
         const response = await User.findOneAndDelete({ email });
 
         if (!response) {
-            return res.status(404).json({ message: "User not found" }); // ✅ If no user found, return 404
+            return res.status(404).json({ message: "User not found" });
         }
-
-        res.status(200).json({ message: "Account Deleted Successfully" }); // ✅ Return success message if deleted
+        res.status(200).json({ message: "Account Deleted Successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message }); // ✅ Fixed status code typo
+        res.status(500).json({ message: "Server Error", error: error.message });
     }
 };
 

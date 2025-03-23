@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function LogoutModal({ showModal, setShowModal, handleLogout }) {
   const navigate = useNavigate();
@@ -10,8 +10,7 @@ export default function LogoutModal({ showModal, setShowModal, handleLogout }) {
     // Cleanup token when the user context changes
     if (user && user.token === localStorage.getItem("authToken")) {
       localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      navigate("/login"); // Use navigate to redirect without page reload
+      navigate("/home");
     }
   }, [user, navigate]); // Cleanup when the user changes
 

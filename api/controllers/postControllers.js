@@ -1,4 +1,6 @@
 const Post = require("../models/postModel")
+const Comment = require("../models/comment")
+// const Like = require("../models/like")
 const User = require("../models/userModel")
 
 const createPost = async (req, res) => {
@@ -96,5 +98,57 @@ const getPostById = async (req, res) => {
     res.status(200).json({ posts })
 }
 
+const likeUnlikePost = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { id: postId } = req.params;
 
-module.exports = { createPost, handleDeletePost, getAllPost, getPostById };
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+
+        const userLikedPost = post.likes.includes(userId);
+
+        if (userLikedPost) {
+            // Unlike
+            await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
+            await User.updateOne({ _id: userId }, { $pull: { likedPosts: postId } });
+        } else {
+            // Like
+            post.likes.push(userId);
+            await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
+            await post.save();
+        }
+
+        res.status(200).json(post.likes);
+    } catch (error) {
+        console.error("Error in likeUnlikePost:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+// Comment on Post
+const commentOnPost = async (req, res) => {
+    try {
+        const { text } = req.body;
+        const postId = req.params.id;
+        const userId = req.user._id;
+
+        if (!text) return res.status(400).json({ error: "Text is required" });
+
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+
+        const comment = await Comment.create({ user: userId, post: postId, text });
+
+        post.comments.push({ user: userId, text });
+        await post.save();
+
+        res.status(200).json(comment);
+    } catch (error) {
+        console.error("Error in commentOnPost:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+module.exports = { createPost, handleDeletePost, getAllPost, getPostById, commentOnPost, likeUnlikePost };

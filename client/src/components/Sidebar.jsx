@@ -30,17 +30,23 @@ export default function Sidebar() {
             Ask
           </Link>
           <Link
+            to="/dashboard/ask"
+            className="px-4 py-2 hover:bg-gray-300 rounded"
+          >
+            Explore
+          </Link>
+          <Link
             to="/dashboard/notification"
             className="px-4 py-2 hover:bg-gray-300 rounded"
           >
             Notification
           </Link>
-          <Link
+          {/* <Link
             to="/dashboard/message"
             className="px-4 py-2 hover:bg-gray-300 rounded"
           >
             Messages
-          </Link>
+          </Link> */}
           <Link
             to="/dashboard/profile"
             className="px-4 py-2 hover:bg-gray-300 rounded"

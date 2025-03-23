@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Post from "../../components/Post";
+import Post from "../Post";
 
-export default function Profile() {
+export default function ProfileModel({ userId }) {
   const [userDetails, setUserDetails] = useState({});
-  const [error, setError] = useState(null); // To track errors
+  const [error, setError] = useState(null);
   const token = window.localStorage.getItem("authToken");
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND}/api/user/profile`,
+          `${import.meta.env.VITE_BACKEND}/api/user/profile/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -27,15 +29,15 @@ export default function Profile() {
     };
 
     fetchUserDetails();
-  }, [token]);
+  }, [userId]);
 
   const capitalizeFirstLetter = (str) => {
-    if (!str) return str; // Check if the string is empty or falsy
+    if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   if (error) {
-    return <div>{error}</div>; // Show error if there's an issue
+    return <div className="text-red-500 text-center">{error}</div>;
   }
 
   return (
@@ -43,15 +45,16 @@ export default function Profile() {
       <div className="flex h-[380px] gap-10 rounded-2xl m-10 p-10 shadow-2xl">
         <div className="border w-[450px] h-[300px]">
           <img
-            src={userDetails.profileImg || "#"}
+            src={userDetails.profileImg}
             alt="User profile"
             className="w-full h-full object-cover rounded-xl"
           />
         </div>
         <div className="w-full">
           <h1 className="text-6xl">
-            <span>{capitalizeFirstLetter(userDetails.username)}</span>
-            {/* {userDetails.username} */}
+            <span>
+              {capitalizeFirstLetter(userDetails.username) || "Unknown"}
+            </span>
           </h1>
           <div className="flex gap-2 mt-3">
             <span>{userDetails.followers?.length || 0} Followers</span>

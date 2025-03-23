@@ -29,7 +29,7 @@ export default function PostPage() {
     };
 
     fetchPosts();
-  }, []);
+  }, [posts]);
 
   // console.log(posts);
   // Filter posts based on the search query (title or description)
@@ -47,16 +47,17 @@ export default function PostPage() {
       </div>
 
       <div className="overflow-auto h-[885px] no-scrollbar mt-3 px-12 py-10 grid grid-cols-2 gap-6">
-        {filteredPosts.length > 0 ? (
+        {Array.isArray(filteredPosts) && filteredPosts.length > 0 ? (
           filteredPosts.map((post) => (
             <Post
               key={post._id}
               postId={post._id}
+              userId={post.author?._id}
               username={post.author?.username || "Unknown"}
               title={post.title}
               description={post.description}
-              likes={post.likes.length}
-              comments={post.comments}
+              likes={post.likes?.length || 0} // Ensure likes is defined
+              comments={post.comments || []} // Ensure comments is an array
               setPosts={setPosts}
             />
           ))
