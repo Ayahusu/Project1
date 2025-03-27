@@ -17,15 +17,6 @@ dbConnect();
 
 const app = express();
 
-<<<<<<< HEAD
-app.use(cors({
-    origin: process.env.FRONTEND,  // Make sure this is set correctly
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow Authorization header
-    credentials: true
-}));
-app.use(cookieParser())
-=======
 app.use(
     cors({
         origin: process.env.FRONTEND,  // Ensure FRONTEND is set correctly
@@ -39,7 +30,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: process.env.FRONTEND },
 });
->>>>>>> dc509c1 (third commit)
 
 app.use(cookieParser());
 app.use(express.json());
