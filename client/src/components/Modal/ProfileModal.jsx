@@ -41,7 +41,7 @@ export default function ProfileModel({ userId }) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-screen">
       <div className="flex h-[380px] gap-10 rounded-2xl m-10 p-10 shadow-2xl">
         <div className="border w-[450px] h-[300px]">
           <img

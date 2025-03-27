@@ -1,45 +1,43 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { UserContext } from "../context/UserContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function LogoutModal({ showModal, setShowModal, handleLogout }) {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
-  useEffect(() => {
-    // Cleanup token when the user context changes
-    if (user && user.token === localStorage.getItem("authToken")) {
-      localStorage.removeItem("authToken");
-      navigate("/home");
-    }
-  }, [user, navigate]); // Cleanup when the user changes
-
-  if (!showModal) return null; // Don't render if not visible
+  if (!showModal) return null;
 
   return (
     <div className="fixed inset-0 flex justify-center items-center z-50">
-      {/* Background Blur Effect */}
-      <div className="absolute inset-0 w-screen bg-white bg-opacity-20 backdrop-blur-md"></div>
+      {/* Transparent Dark Overlay */}
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
+        onClick={() => setShowModal(false)} // Click outside to close modal
+      ></div>
 
       {/* Modal Box */}
-      <div className="relative bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl mb-4">Are you sure you want to logout?</h2>
-        <div className="flex justify-end">
+      <div className="relative bg-white p-6 rounded-lg shadow-xl w-96 text-center">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Are you sure you want to logout?
+        </h2>
+
+        {/* Buttons */}
+        <div className="flex justify-center mt-5 gap-4">
           <button
-            className="mr-2 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-            onClick={() => setShowModal(false)} // Close the modal
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+            onClick={() => setShowModal(false)}
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
             onClick={() => {
-              // Clear user context and local storage
-              setUser(null); // Clear user context
-              localStorage.removeItem("authToken"); // Remove auth token from localStorage
-              handleLogout(); // Perform any additional logout logic
-              setShowModal(false); // Close modal after logout
-              navigate("/login"); // Redirect to login without page reload
+              setUser(null); // Clear user session
+              localStorage.removeItem("authToken"); // Remove token
+              handleLogout(); // Additional cleanup logic
+              setShowModal(false); // Close modal
+              navigate("/"); // Redirect to login
             }}
           >
             Logout

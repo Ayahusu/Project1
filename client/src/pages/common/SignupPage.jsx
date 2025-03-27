@@ -25,6 +25,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         window.localStorage.setItem("authToken", response.data.token);
+        window.localStorage.setItem("user", JSON.stringify(response.data.user));
         navigate("/dashboard/post");
       } else {
         alert("Login Unsuccessful");
@@ -93,7 +94,7 @@ export default function LoginPage() {
             type="submit"
             className="mt-4 p-2 bg-blue-500 lg:w-28 sm:w-16 rounded text-white"
           >
-            Login
+            Signin
           </button>
         </form>
       </div>

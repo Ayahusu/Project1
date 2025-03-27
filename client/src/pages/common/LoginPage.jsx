@@ -23,6 +23,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         window.localStorage.setItem("authToken", response.data.token);
+        window.localStorage.setItem("user", JSON.stringify(response.data.user));
         navigate("/dashboard/post");
       } else {
         alert("Login Unsuccessful");

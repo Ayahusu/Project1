@@ -1,74 +1,85 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
+import {
+  FaHome,
+  FaQuestionCircle,
+  FaUserFriends,
+  FaBell,
+  FaUser,
+  FaSignOutAlt,
+  FaCompass,
+} from "react-icons/fa";
 import LogoutModal from "./LogoutModel";
+import { AiFillMessage } from "react-icons/ai";
+import logo from "../assets/logo.png"; // Ensure you have a logo
 
 export default function Sidebar() {
   const [showModal, setShowModal] = useState(false);
 
-  // Simulate logout functionality (you can implement your actual logout logic here)
+  // Logout function
   const handleLogout = () => {
-    // Clear user data or token, etc.
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("authToken"); // Clear token
     console.log("User logged out");
   };
 
   return (
-    <div className="h-fit shadow-2xl">
-      <div className="fit flex flex-col justify-between">
-        <div className="flex flex-col space-y-4 p-2">
-          <Link
-            to="/dashboard/post"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Home
-          </Link>
-          <Link
-            to="/dashboard/ask"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Ask
-          </Link>
-          <Link
-            to="/dashboard/ask"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Explore
-          </Link>
-          <Link
-            to="/dashboard/notification"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Notification
-          </Link>
-          {/* <Link
-            to="/dashboard/message"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Messages
-          </Link> */}
-          <Link
-            to="/dashboard/profile"
-            className="px-4 py-2 hover:bg-gray-300 rounded"
-          >
-            Profile
-          </Link>
-        </div>
-        <div className="border-t p-2">
-          <button
-            onClick={() => setShowModal(true)}
-            className="w-full px-2 py-2 block text-center hover:bg-gray-300 rounded"
-          >
-            Logout
-          </button>
-        </div>
+    <div className="w-[250px] h-[880px] fixed bg-white border-r border-gray-300 shadow-md flex flex-col justify-between">
+      {/* Navigation Links */}
+      <nav className="flex flex-col space-y-2 p-4">
+        <SidebarLink to="/dashboard/post" icon={<FaHome />} text="Home" />
+        <SidebarLink
+          to="/dashboard/ask"
+          icon={<FaQuestionCircle />}
+          text="Ask"
+        />
+        <SidebarLink
+          to="/dashboard/notification"
+          icon={<FaBell />}
+          text="Notifications"
+        />
+        <SidebarLink
+          to="/dashboard/friends"
+          icon={<FaUserFriends />}
+          text="Friends"
+        />
+        <SidebarLink
+          to="/dashboard/message"
+          icon={<AiFillMessage />}
+          text="Message"
+        />
+        <SidebarLink to="/dashboard/profile" icon={<FaUser />} text="Profile" />
+      </nav>
+
+      {/* Logout Button */}
+      <div className="p-4 border-t">
+        <button
+          onClick={() => setShowModal(true)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 rounded transition"
+        >
+          <FaSignOutAlt />
+          Logout
+        </button>
       </div>
 
+      {/* Logout Confirmation Modal */}
       <LogoutModal
         showModal={showModal}
         setShowModal={setShowModal}
         handleLogout={handleLogout}
       />
     </div>
+  );
+}
+
+// Reusable Sidebar Link Component
+function SidebarLink({ to, icon, text }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition"
+    >
+      {icon}
+      {text}
+    </Link>
   );
 }

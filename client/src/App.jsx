@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 import LandingLayout from "./layouts/LandingLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -8,14 +9,20 @@ import AboutPage from "./pages/common/AboutPage";
 import LoginPage from "./pages/common/LoginPage";
 import SignupPage from "./pages/common/SignupPage";
 import PostPage from "./pages/protected/PostPage";
-import NotificationPage from "./pages/protected/NotificationPage";
-import MessagePost from "./pages/protected/MessagePost";
 import ProfilePage from "./pages/protected/ProfilePage";
 import AskPage from "./pages/protected/AskPage";
+import NotificationPage from "./pages/protected/NotificationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MessagesPage from "./pages/protected/MessagePage";
+import Friends from "./pages/protected/Friends";
 
 function App() {
   const isLoggedIn = window.localStorage.getItem("authToken");
+
+  // useEffect(() => {
+  //   const socket = io(import.meta.env.VITE_BACKEND);
+  // }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -40,10 +47,11 @@ function App() {
 
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="post" element={<PostPage />} />
+            <Route path="message" element={<MessagesPage />} />
             <Route path="notification" element={<NotificationPage />} />
-            <Route path="message" element={<MessagePost />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="ask" element={<AskPage />} />
+            <Route path="friends" element={<Friends />} />
           </Route>
         </Route>
       </Routes>

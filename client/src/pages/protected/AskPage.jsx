@@ -69,7 +69,7 @@ export default function AskPage() {
   }, [error, success]);
 
   return (
-    <div className="h-full flex justify-center items-center">
+    <div className="mt-20 ml-20">
       <form
         onSubmit={handleSubmit}
         className="w-[500px] border p-5 border-gray-300 rounded shadow-2xl"

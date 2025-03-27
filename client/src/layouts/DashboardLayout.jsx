@@ -1,18 +1,22 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/Sidebar"; // Example sidebar
+import Sidebar from "../components/Sidebar";
+import NavBar from "./NavBar";
 
 const DashboardLayout = () => {
   return (
-    <div className="flex gap-6 px-[10%] w-full h-[950px] mt-2 shadow-2xl">
-      <div className="w-[200px] h-full flex items-center">
-        <div className="w-[200px] h-fit shadow-2xl rounded-2xl">
+    <div className="w-screen h-screen flex flex-col">
+      <NavBar />
+      <div className="flex w-full h-full mt-20">
+        {/* Sidebar */}
+        <div className="w-[250px] fixed h-full">
           <Sidebar />
         </div>
-      </div>
 
-      <div className="w-full shadow-2xl overflow-auto no-scrollbar">
-        <Outlet />
+        {/* Main Content */}
+        <div className="flex-1 ml-[250px] overflow-auto no-scrollbar">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

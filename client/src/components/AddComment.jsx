@@ -1,53 +1,51 @@
 import React, { useState } from "react";
-import profile from "../assets/profile.png";
 import axios from "axios";
 
-export default function AddComment() {
+export default function AddComment({ postId, onCommentAdded }) {
   const [comment, setComment] = useState("");
+  const token = window.localStorage.getItem("authToken");
 
-  const handleComment = async (e) => {
+  const handleAddComment = async (e) => {
     e.preventDefault();
-
-    if (!comment.trim()) return; // Prevent empty comments
+    if (!comment) return;
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND}/api/user/comment`,
+        `${import.meta.env.VITE_BACKEND}/api/posts/comment/${postId}`,
         { comment },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      if (response.status === 200) {
-        alert("Comment Added");
-        setComment(""); // Reset input after successful submission
-      }
+      // Pass the new comment back to the parent component (Post)
+      onCommentAdded(response.data.comment);
+
+      // Clear the input field after submitting
+      setComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
-      alert("Failed to add comment");
     }
   };
 
   return (
-    <div className="mt-2 border-gray-400">
-      <div className="flex gap-2 mt-3">
-        <img src={profile} alt="Profile" className="w-7 h-7" />
-        <div className="w-full rounded-xl p-2 bg-gray-200">
-          <form onSubmit={handleComment}>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="w-full h-10 text-sm rounded-md outline-none resize-none overflow-hidden whitespace-pre-wrap p-1"
-              placeholder="Write a comment..."
-            />
-            <button
-              type="submit"
-              className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600"
-            >
-              Post
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+    <form onSubmit={handleAddComment}>
+      <input
+        type="text"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Add a comment..."
+        className="w-full p-2 border rounded-lg"
+      />
+      <button
+        type="submit"
+        className="mt-2 bg-blue-500 text-white p-2 rounded-lg"
+      >
+        Add Comment
+      </button>
+    </form>
   );
 }

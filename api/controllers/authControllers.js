@@ -32,7 +32,7 @@ async function registerUser(req, res) {
         const token = await user.genAuthToken();
 
         // Send the token in the response (no sensitive user data)
-        res.status(200).json({ token });
+        res.status(200).json({ token, user });
 
     } catch (error) {
         // Handle server errors
@@ -64,7 +64,7 @@ const loginUser = async (req, res) => {
         const token = await user.genAuthToken();
 
         // Send the token in the response (no sensitive user data)
-        res.status(200).json({ token });
+        res.status(200).json({ token, user });
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
