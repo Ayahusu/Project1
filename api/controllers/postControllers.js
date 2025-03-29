@@ -79,37 +79,71 @@ const handleUpdatePost = async (req, res) => {
 
 
 
+// const getAllPost = async (req, res) => {
+//     try {
+//         // Destructure and provide default values for pagination
+//         const { page = 1, limit = 10 } = req.query;
+
+//         // Convert page and limit to numbers (default to 10 if invalid input)
+//         const pageNumber = parseInt(page, 10) || 1;
+//         const limitNumber = parseInt(limit, 10) || 10;
+
+//         // Fetch the posts with pagination, population, and sorting
+//         const postList = await Post.find()
+//             .populate("author", "username")
+//             .populate({
+//                 path: "comments",
+//                 populate: [
+//                     { path: "userId", select: "username" },
+//                     { path: "replies.userId", select: "username" }
+//                 ]
+//             })
+//             .sort({ createdAt: -1 })
+//             .skip((pageNumber - 1) * limitNumber)
+//             .limit(limitNumber)
+//             .exec();
+
+//         // If no posts are found, return an empty array
+//         if (!postList.length) {
+//             return res.status(200).json([]);
+//         }
+
+//         // Return the posts as JSON response
+//         res.status(200).json(postList);
+//     } catch (error) {
+//         console.error("Error in getAllPost:", error);
+//         return res.status(500).json({ message: "Internal Server Error", error: error.message });
+//     }
+// };
+
 const getAllPost = async (req, res) => {
     try {
-        // Destructure and provide default values for pagination
-        const { page = 1, limit = 10 } = req.query;
+        // Ensure default values for pagination
+        const pageNumber = Math.max(parseInt(req.query.page, 10) || 1, 1);
+        const limitNumber = Math.max(parseInt(req.query.limit, 10) || 10, 1);
 
-        // Convert page and limit to numbers (default to 10 if invalid input)
-        const pageNumber = parseInt(page, 10) || 1;
-        const limitNumber = parseInt(limit, 10) || 10;
-
-        // Fetch the posts with pagination, population, and sorting
+        // Fetch posts with pagination, sorting, and optimized population
         const postList = await Post.find()
-            .populate('author', 'username profileImg')
-            .populate('comments.user', 'username profileImg')
-            .limit(limitNumber)
+            .populate("author", "username")
+            .populate({
+                path: "comments",
+                populate: {
+                    path: "userId replies.userId",
+                    select: "username"
+                }
+            })
+            .sort({ createdAt: -1 })
             .skip((pageNumber - 1) * limitNumber)
-            .sort({ createdAt: -1 });
+            .limit(limitNumber)
+            .exec();
 
-        // If no posts are found, return an empty array
-        if (!postList.length) {
-            return res.status(200).json([]);
-        }
-
-        // Return the posts as JSON response
-        res.status(200).json(postList);
+        // Return empty array if no posts found
+        res.status(200).json(postList.length ? postList : []);
     } catch (error) {
         console.error("Error in getAllPost:", error);
-        return res.status(500).json({ message: "Internal Server Error", error: error.message });
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
-
-
 
 const getPostById = async (req, res) => {
 
@@ -129,7 +163,6 @@ const commentOnPost = async (req, res) => {
     try {
         const { comment } = req.body;
         const userId = req.user._id;
-        const username = req.user.username;
 
         if (!comment) {
             return res.status(400).json({ error: "Comment text is required" });
@@ -138,7 +171,6 @@ const commentOnPost = async (req, res) => {
         const newComment = new Comment({
             postId: req.params.postId,
             userId,
-            username, // Store username
             text: comment,
         });
 
@@ -156,68 +188,66 @@ const commentOnPost = async (req, res) => {
     }
 }
 
+// const handleReplies = async (req, res) => {
+//     try {
+//         const userId = req.user._id; // Get the authenticated user
+//         const { replyText } = req.body;
+//         const { commentId } = req.params;
 
+//         // Find the specific comment
+//         const comment = await Comment.findById(commentId);
+//         if (!comment) {
+//             return res.status(404).json({ message: "Comment not found" });
+//         }
 
-const likePost = async (req, res) => {
+//         // Create the new reply object
+//         const newReply = {
+//             userId: userId, // Replying user
+//             text: replyText,
+//             createdAt: new Date(),
+//         };
+
+//         // Push the reply into the comment's replies array
+//         comment.replies.push(newReply);
+
+//         // Save the updated comment
+//         await comment.save();
+
+//         res.status(201).json({ message: "Reply added successfully", reply: newReply });
+//     } catch (error) {
+//         console.error("Error in handleReplies:", error);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+const handleReplies = async (req, res) => {
     try {
-        const postId = req.params.postId;
+        const { text } = req.body;
+        const { commentId } = req.params;
         const userId = req.user._id;
-        console.log("Post ID:", postId, "User ID:", userId);
 
-        // Check if the post exists
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ message: "Post not found" });
+        // Find the comment
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
         }
 
-        // Check if the user has already liked the post
-        if (post.likes.includes(userId)) {
-            return res.status(400).json({ message: "Post already liked" });
-        }
+        // Create new reply object
+        const newReply = { userId, text };
 
-        // Add user to the likes array
-        post.likes.push(userId);
-        await post.save();
+        // Add reply to the comment's replies array
+        comment.replies.push(newReply);
+        await comment.save();
 
-        res.status(200).json({ message: "Post liked successfully", post });
+        // Populate userId to return username
+        await comment.populate("replies.userId", "username");
+
+        // Return the last added reply
+        res.status(201).json(comment.replies[comment.replies.length - 1]);
     } catch (error) {
-        console.error("Error liking post:", error);
-        res.status(500).json({ message: "Internal Server Error", error });
+        console.error("Error adding reply:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
 
 
-// Unlike a post
-const unlikePost = async (req, res) => {
-    try {
-        const postId = req.params.id;
-        const userId = req.user._id;
-
-        console.log("Post ID:", postId, "User ID:", userId);
-
-        // Check if the post exists
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ message: "Post not found" });
-        }
-
-        // Check if the user has actually liked the post
-        if (!post.likes.includes(userId)) {
-            return res.status(400).json({ message: "You have not liked this post yet." });
-        }
-
-        // Remove the user's like
-        post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
-        await post.save();
-
-        res.status(200).json({ message: "Post unliked successfully", post });
-    } catch (error) {
-        console.error("Error unliking post:", error);
-        res.status(500).json({ message: "Internal Server Error", error });
-    }
-};
-
-
-
-
-module.exports = { createPost, handleDeletePost, handleUpdatePost, getAllPost, getPostById, commentOnPost, likePost, unlikePost };
+module.exports = { createPost, handleDeletePost, handleUpdatePost, getAllPost, getPostById, commentOnPost, handleReplies };

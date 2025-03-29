@@ -10,15 +10,12 @@ export default function Profile() {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND}/api/user/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.get(`/api/user/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         setUserDetails(response.data);
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -37,6 +34,7 @@ export default function Profile() {
   if (error) {
     return <div>{error}</div>; // Show error if there's an issue
   }
+  console.log(userDetails);
 
   return (
     <div className="h-full w-full overflow-auto no-scrollbar p-6">
@@ -77,8 +75,8 @@ export default function Profile() {
               username={userDetails.username || "Unknown"}
               title={post.title}
               description={post.description}
-              likes={post.likes.length}
-              comments={post.comments}
+              likes={post.likes?.length || 0}
+              comments={post.comments || []} // Ensure comments are passed correctly
             />
           ))
         ) : (

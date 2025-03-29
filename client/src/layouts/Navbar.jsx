@@ -1,6 +1,7 @@
 import { FaSearch } from "react-icons/fa";
 import logo from "../assets/logo.png";
 import { useSearch } from "../context/SearchContext"; // Import search context
+import { Link } from "react-router-dom";
 
 export default function NavBar() {
   const { searchQuery, setSearchQuery } = useSearch(); // Use global search state
@@ -8,9 +9,11 @@ export default function NavBar() {
   return (
     <div className="fixed top-0 left-0 w-full bg-white shadow-md flex items-center justify-between px-6 py-3 z-50">
       {/* Logo Section */}
-      <div className="flex items-center space-x-3">
-        <img src={logo} alt="Logo" className="w-40 h-14 rounded-full" />
-      </div>
+      <Link to="/dashboard/post">
+        <div className="flex items-center space-x-3">
+          <img src={logo} alt="Logo" className="w-40 h-14 rounded-full" />
+        </div>
+      </Link>
 
       {/* Search Bar */}
       <div className="flex items-center w-[600px] bg-gray-100 rounded-full px-4 py-2">

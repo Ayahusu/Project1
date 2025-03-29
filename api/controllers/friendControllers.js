@@ -1,7 +1,7 @@
 const User = require("../models/User");
 
 // Send Friend Request
-exports.sendFriendRequest = async (req, res) => {
+const sendFriendRequest = async (req, res) => {
     try {
         const { senderId, receiverId } = req.body;
         const receiver = await User.findById(receiverId);
@@ -20,7 +20,7 @@ exports.sendFriendRequest = async (req, res) => {
 };
 
 // Accept Friend Request
-exports.acceptFriendRequest = async (req, res) => {
+const acceptFriendRequest = async (req, res) => {
     try {
         const { userId, requestId } = req.body;
         const user = await User.findById(userId);
@@ -43,7 +43,7 @@ exports.acceptFriendRequest = async (req, res) => {
 };
 
 // Decline Friend Request
-exports.declineFriendRequest = async (req, res) => {
+const declineFriendRequest = async (req, res) => {
     try {
         const { userId, requestId } = req.body;
         const user = await User.findById(userId);
@@ -58,3 +58,9 @@ exports.declineFriendRequest = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+module.exports = {
+    sendFriendRequest,
+    acceptFriendRequest,
+    declineFriendRequest
+}

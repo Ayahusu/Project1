@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Post from "../../components/Post";
 import axios from "axios";
-import { useSearch } from "../../context/SearchContext"; // Import search context
+import { useSearch } from "../../context/SearchContext";
 
 export default function PostPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { searchQuery } = useSearch(); // Get search query from context
+  const { searchQuery } = useSearch();
 
   useEffect(() => {
     const token = window.localStorage.getItem("authToken");
@@ -40,7 +40,6 @@ export default function PostPage() {
     fetchPosts();
   }, []);
 
-  // Filter posts dynamically based on search query
   const filteredPosts = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,7 +48,6 @@ export default function PostPage() {
 
   return (
     <div className="h-full w-full overflow-auto no-scrollbar p-6">
-      {/* Loading & Error Messages */}
       {loading ? (
         <p className="text-center text-gray-500">Loading posts...</p>
       ) : error ? (

@@ -37,16 +37,16 @@ export default function Sidebar() {
           icon={<FaBell />}
           text="Notifications"
         />
-        <SidebarLink
+        {/* <SidebarLink
           to="/dashboard/friends"
           icon={<FaUserFriends />}
           text="Friends"
-        />
-        <SidebarLink
+        /> */}
+        {/* <SidebarLink
           to="/dashboard/message"
           icon={<AiFillMessage />}
           text="Message"
-        />
+        /> */}
         <SidebarLink to="/dashboard/profile" icon={<FaUser />} text="Profile" />
       </nav>
 

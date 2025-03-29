@@ -21,10 +21,8 @@ export default function AddComment({ postId, onCommentAdded }) {
         }
       );
 
-      // Pass the new comment back to the parent component (Post)
       onCommentAdded(response.data.comment);
 
-      // Clear the input field after submitting
       setComment("");
     } catch (error) {
       console.error("Error adding comment:", error);

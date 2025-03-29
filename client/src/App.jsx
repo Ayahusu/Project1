@@ -15,13 +15,10 @@ import NotificationPage from "./pages/protected/NotificationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MessagesPage from "./pages/protected/MessagePage";
 import Friends from "./pages/protected/Friends";
+import ProfileModel from "./components/Modal/ProfileModal";
 
 function App() {
   const isLoggedIn = window.localStorage.getItem("authToken");
-
-  // useEffect(() => {
-  //   const socket = io(import.meta.env.VITE_BACKEND);
-  // }, []);
 
   return (
     <BrowserRouter>
@@ -52,6 +49,7 @@ function App() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="ask" element={<AskPage />} />
             <Route path="friends" element={<Friends />} />
+            <Route path="user/:userId" element={<ProfileModel />} />
           </Route>
         </Route>
       </Routes>

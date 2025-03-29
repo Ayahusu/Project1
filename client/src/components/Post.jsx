@@ -6,6 +6,7 @@ import { TfiComment } from "react-icons/tfi";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Comments from "./Comments";
 import AddComment from "./AddComment";
+import { Link } from "react-router-dom";
 
 export default function Post({
   postId,
@@ -29,11 +30,17 @@ export default function Post({
   const token = window.localStorage.getItem("authToken");
   const user = JSON.parse(window.localStorage.getItem("user"));
 
+  //Capitalize First Letter of User
+  const capitalizeFirstLetter = (str) => {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  };
+
   useEffect(() => {
     setPostComments(comments || []);
     setLiked(Array.isArray(likes) && likes.includes(userId));
   }, [comments, likes, userId]);
 
+  // Handle Add Comment
   const handleAddComment = (newComment) => {
     if (!newComment || typeof newComment !== "object") {
       console.error("Invalid comment data received:", newComment);
@@ -51,20 +58,13 @@ export default function Post({
     ]);
   };
 
-  const handleToggle = () => {
-    setToggleOptions(!toggleComment);
-  };
-
   const handleOverlayClick = (e) => {
     if (e.target.id === "overlay") {
       setToggleComment(false);
     }
   };
 
-  const capitalizeFirstLetter = (str) => {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
-  };
-
+  // Handle Delete Post
   const handleDeletePost = async () => {
     try {
       await axios.delete(`/api/posts/deletePost/${postId}`, {
@@ -76,6 +76,7 @@ export default function Post({
     }
   };
 
+  // Handle Edit Post
   const handleEditPost = async () => {
     try {
       const updatedPost = {
@@ -100,48 +101,23 @@ export default function Post({
     }
   };
 
-  // Handle like action
-  const handleLike = async () => {
-    console.log("Post ID:", postId, "User ID:", user._id);
-    if (!postId || !user._id) {
-      console.error("postId or userId is missing!");
-      return; // Prevent request if postId is missing
-    }
+  //handle like Button
 
-    try {
-      if (liked) {
-        await axios.delete(
-          `/api/posts/unlike/${postId}`,
-          { data: { userId: user._id } }, // Fix: Send userId inside 'data' for DELETE request
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setLiked(false);
-        setLikeCount((prevCount) => prevCount - 1);
-      } else {
-        await axios.post(
-          `/api/posts/like/${postId}`,
-          { userId: user._id },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setLiked(true);
-        setLikeCount((prevCount) => prevCount + 1);
-      }
-    } catch (error) {
-      console.error("Error handling like action:", error);
-    }
+  const handleLikeUnlike = async () => {
+    // try {
+    //   const response = await axios.put(`api/like/:${postId}`);
+    // } catch (error) {}
+    setLiked(!liked);
   };
+
   return (
     <>
-      {/* Post Card */}
+      {/* Post */}
       <div className="w-[450px] h-[370px] rounded-2xl p-3 shadow-2xl flex flex-col relative">
-        {/* Options Button */}
         <button
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
           onClick={() => setToggleOptions(!toggleOptions)}
+          style={{ display: userId === user._id ? "block" : "none" }}
         >
           <BsThreeDotsVertical />
         </button>
@@ -163,9 +139,11 @@ export default function Post({
           </div>
         )}
 
-        {/* Post Content */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          <div className="flex items-center gap-2 cursor-pointer">
+          <Link
+            to={`/dashboard/user/${userId}`}
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <img
               src={profile}
               alt="Profile"
@@ -173,7 +151,7 @@ export default function Post({
             />
             <span>{capitalizeFirstLetter(username)}</span>
             <span className="text-gray-500 text-sm">1d</span>
-          </div>
+          </Link>
 
           <div className="mt-2 p-3 rounded-xl bg-gray-200 h-[250px] overflow-y-auto no-scrollbar">
             {isEditing ? (
@@ -213,9 +191,9 @@ export default function Post({
             )}
           </div>
           <div className="flex justify-around items-center mt-3">
-            <div
+            <button
               className="w-[150px] flex justify-center items-center gap-1 cursor-pointer rounded py-1 hover:bg-gray-200 transition"
-              onClick={handleLike}
+              onClick={handleLikeUnlike}
             >
               <AiFillHeart
                 className={`w-6 h-6 ${
@@ -223,7 +201,7 @@ export default function Post({
                 }`}
               />
               <span>{likeCount} Likes</span>
-            </div>
+            </button>
 
             <div
               className="w-[150px] flex justify-center items-center gap-1 rounded py-1 cursor-pointer hover:bg-gray-200 transition"
@@ -236,7 +214,7 @@ export default function Post({
         </div>
       </div>
 
-      {/* Comments Modal */}
+      {/* Post After Toggle */}
       {toggleComment && (
         <div
           id="overlay"
@@ -264,9 +242,9 @@ export default function Post({
             </div>
 
             <div className="flex justify-around items-center mt-3">
-              <div
+              <button
                 className="w-[150px] flex justify-center items-center gap-1 cursor-pointer rounded py-1 hover:bg-gray-200 transition"
-                onClick={handleLike}
+                onClick={handleLikeUnlike}
               >
                 <AiFillHeart
                   className={`w-6 h-6 ${
@@ -274,7 +252,7 @@ export default function Post({
                   }`}
                 />
                 <span>{likeCount} Likes</span>
-              </div>
+              </button>
 
               <div
                 className="w-[150px] flex justify-center items-center gap-1 rounded py-1 cursor-pointer hover:bg-gray-200 transition"
@@ -292,8 +270,14 @@ export default function Post({
                   postComments.map((comment, index) => (
                     <Comments
                       key={comment._id || index}
-                      username={comment.user?.username || "Unknown User"}
+                      commentId={comment._id}
+                      username={
+                        comment.userId
+                          ? capitalizeFirstLetter(comment.userId.username)
+                          : "Unknown User"
+                      }
                       comment={comment.text}
+                      replies={comment.replies || []}
                     />
                   ))
                 ) : (
@@ -301,7 +285,6 @@ export default function Post({
                 )}
               </div>
               <AddComment postId={postId} onCommentAdded={handleAddComment} />{" "}
-              {/* Pass the callback */}
             </div>
           </div>
         </div>

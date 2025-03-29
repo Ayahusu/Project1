@@ -1,23 +1,41 @@
+import axios from "axios";
 import { useState, useEffect } from "react";
+import profile from "../../assets/profile.png";
 
-const FriendList = ({ userId }) => {
+const FriendList = () => {
   const [friends, setFriends] = useState([]);
+
+  const capitalizeFirstLetter = (str) => {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  };
 
   useEffect(() => {
     const fetchFriends = async () => {
+      const token = window.localStorage.getItem("authToken");
+      console.log(token);
+
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND}/api/users/${userId}/friends`
-        );
-        const data = await response.json();
-        setFriends(data);
+        const response = await axios.get(`/api/user/friends`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log(response.data);
+        setFriends(response.data.friends);
       } catch (error) {
-        console.error("Error fetching friends:", error);
+        console.error(
+          "Error fetching friends:",
+          error.response?.data || error.message
+        );
       }
     };
 
     fetchFriends();
-  }, [userId]);
+  }, []);
 
   return (
     <div className="w-full h-full bg-white p-4 rounded-2xl shadow-lg">
@@ -33,19 +51,21 @@ const FriendList = ({ userId }) => {
             >
               <div className="flex items-center gap-3">
                 <img
-                  src={friend.profilePic || "https://via.placeholder.com/50"}
+                  src={friend.profilePic || profile}
                   alt={friend.username}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div>
-                  <p className="font-medium">{friend.username}</p>
-                  <span
+                  <p className="font-medium">
+                    {capitalizeFirstLetter(friend.username)}
+                  </p>
+                  {/* <span
                     className={`text-sm ${
                       friend.isOnline ? "text-green-500" : "text-gray-400"
                     }`}
                   >
                     {friend.isOnline ? "Online" : "Offline"}
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </li>
